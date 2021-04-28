@@ -30,8 +30,9 @@ class Body
 		
 		Body(const sf::Vector3f &position, float mass);
 		
+		/// Calculate the gravity from all of the bodies in the quadtree
 		void gravity(Quad *quadtree, const float &dt);
-		void gravity(std::vector<Body *> &bodies, const float &dt);
+		
 		void update(float dt);
 		void draw(sf::RenderWindow &window);
 };

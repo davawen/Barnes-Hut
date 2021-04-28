@@ -15,12 +15,12 @@ Body::Body(const sf::Vector3f &position, float mass)
 	
 	// this->shape = sf::CircleShape(1.f);
 	// this->shape.setOrigin(1.f, 1.f);
-	this->shape = sf::VertexArray(sf::PrimitiveType::Points, 1);
+	this->shape = sf::VertexArray(sf::PrimitiveType::Quads, 4);
 
 	float colorAmount = randf();
-	for(int i = 0; i < 1; i++)
+	for(int i = 0; i < 4; i++)
 	{
-		this->shape[i].color = sf::Color(colorLerp(0x0000FFFF, 0x7FFFFFFF, colorAmount));
+		this->shape[i].color = sf::Color(colorLerp(0x0000FFFF, 0x7FFFFFFF, colorAmount + (randf() * .02f) - .01f));
 	}
 }
 
@@ -36,28 +36,23 @@ void Body::gravity(Quad *quadtree, const float &dt)
 		auto difference = quadtree->data->position - this->position;
 		
 		float sqDst = difference.x * difference.x + difference.y * difference.y + difference.z * difference.z;
-		if(sqDst <= 2.f) return;
+		if(sqDst <= size*size)
+		{
+			velocity -= velocity * .01f * dt; // "Friction"
+			return;
+		}
 		
 		float forceValue = G * quadtree->data->mass / sqDst;
 		
 		auto force = forceValue * difference;
-
-		// if(forceValue > 100.f)
-		// {
-		// 	printf( "mass: %f, distance: %f, x: %f, y: %f\n", quadtree->mass, sqrtf(sqDst), force.x, force.y );
-		// }
 
 		this->velocity += force * dt;
 		
 		return;
 	}
 	
-	// std::cout << "b\n";
-	
 	//Calculate distance to quadtree center
 	sf::Vector3f diff = quadtree->centerOfMass - position;
-	
-	// std::cout << "c\n";
 	
 	float distance = sqrtf( diff.x * diff.x + diff.y * diff.y + diff.z * diff.z );
 	
@@ -70,13 +65,6 @@ void Body::gravity(Quad *quadtree, const float &dt)
 		
 		auto force = forceValue * diff;
 		
-		// if(forceValue > 100.f)
-		// {
-		// 	printf( "mass: %f, distance: %f, x: %f, y: %f\n", quadtree->mass, distance, force.x, force.y );
-		// }
-		
-		// printf("mass: %f, distance: %f, x: %f, y: %f\n", quadtree->mass, distance, force.x, force.y );
-		
 		velocity += force * dt;
 	}
 	else
@@ -88,38 +76,18 @@ void Body::gravity(Quad *quadtree, const float &dt)
 	}
 }
 
-void Body::gravity(std::vector<Body *> &bodies, const float &dt)
-{
-	for(auto &body : bodies)
-	{
-		if(body == this) continue;
-		
-		auto difference = body->position - this->position;
-		
-		float sqDst = difference.x * difference.x + difference.y * difference.y;
-		
-		if(sqDst <= 4.f) continue;
-		
-		auto force = this->G * body->mass * difference / sqDst;
-		
-		std::cout << dt << std::endl;
-		
-		this->velocity += force * dt;
-	}
-}
-
 void Body::update(float dt)
 {
 	position += velocity * dt;
 	
-	shape[0].position = { position.x, position.y };
+	// shape[0].position = { position.x, position.y };
 	
 	// float s = size / (position.z*.001 + 1.f);
 	
-	// shape[0].position = { position.x - s / 2.f, position.y - s / 2.f };
-	// shape[1].position = { position.x + s / 2.f, position.y - s / 2.f };
-	// shape[2].position = { position.x + s / 2.f, position.y + s / 2.f };
-	// shape[3].position = { position.x - s / 2.f, position.y + s / 2.f };
+	shape[0].position = { position.x - size / 2.f, position.y - size / 2.f };
+	shape[1].position = { position.x + size / 2.f, position.y - size / 2.f };
+	shape[2].position = { position.x + size / 2.f, position.y + size / 2.f };
+	shape[3].position = { position.x - size / 2.f, position.y + size / 2.f };
 }
 
 void Body::draw(sf::RenderWindow &window)

@@ -1,6 +1,5 @@
 #include <vector>
 #include <iostream>
-#include <Windows.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -24,9 +23,9 @@ int main()
 	auto quadtree = Quad(sf::Vector3f(-1000.f, -1000.f, -1000.f), sf::Vector3f(3000.f, 3000.f, 3000.f));
 	
 	std::vector<Body *> bodies;
-	bodies.reserve( 5000 );
+	bodies.reserve( 3000 );
 	
-	for(int i = 0; i < 5000; i++)
+	for(int i = 0; i < 3000; i++)
 	{
 		//Generate sphere coordinate
 		float u = randf();
@@ -101,10 +100,6 @@ int main()
 					{
 						case sf::Keyboard::S:
 							isRunning = !isRunning;
-							
-							Sleep(1000);
-							
-							deltaClock.restart();
 							break;
 						case sf::Keyboard::Q:
 							isDrawingQuadtree = !isDrawingQuadtree;
@@ -117,7 +112,7 @@ int main()
 					break;
 			}
 		}
-
+		
 		window.clear();
 		
 		if(isDrawingQuadtree) quadtree.draw( window );
