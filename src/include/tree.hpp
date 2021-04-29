@@ -19,10 +19,10 @@ struct Quad
 		sf::Vector3f p;
 		sf::Vector3f size;
 		
-		bool divided;
+		enum State { empty, leaf, divided };
 		
-		Body *data;
-
+		State state : 2;
+		
 		sf::Vector3f centerOfMass;
 		float mass;
 		

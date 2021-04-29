@@ -10,9 +10,7 @@ Quad::Quad( const sf::Vector3f &p, const sf::Vector3f &size)
 	this->centerOfMass = p + size / 2.f;
 	this->mass = 0;
 	
-	this->data = NULL;
-	
-	this->divided = false;
+	this->state = State::empty;
 	
 	// std::cout << this->divided;
 	
@@ -48,12 +46,12 @@ void Quad::subdivide()
 		}
 	}
 	
-	divided = true;
+	state = State::divided;
 }
 
 void Quad::clean()
 {
-	if(!divided) return;
+	if(state != State::divided) return;
 	
 	for(auto &node : nodes)
 	{
@@ -66,12 +64,12 @@ void Quad::clean()
 void Quad::cleanRoot()
 {
 	// Offset quadtree to stay at center of mass
-	p -= (( p + size / 2.f ) - centerOfMass);
+	// p -= (( p + size / 2.f ) - centerOfMass);
 	
 	centerOfMass = p + size / 2.f;
 	mass = 0;
 	
-	if(!divided) return;
+	if(state != State::divided) return;
 	
 	for(auto &node : nodes)
 	{
@@ -81,8 +79,8 @@ void Quad::cleanRoot()
 		
 		node = NULL;
 	}
-	
-	divided = false;
+
+	state = State::empty;
 }
 
 void Quad::insert(Body *body)
@@ -92,26 +90,27 @@ void Quad::insert(Body *body)
 		
 	if(!inBoundary( body->position ))
 		return;
+
+	// std::cout << "Working with body: " << body << "\n";
 	
 	centerOfMass = (centerOfMass * mass + body->position * body->mass) / (mass + body->mass);
 	mass += body->mass;
 	
-	if(data == NULL)
+	switch(state)
 	{
-		data = body;
+		case State::empty:
+			state = State::leaf;
+			break;
+		case State::leaf:
+			subdivide();
+		// Notice there is no break
+		case State::divided:
+			for(auto &node : nodes)
+			{
+				node->insert(body);
+			}
+			break;
 	}
-	else
-	{
-		// if(size.x < 1 && size.y < 1)
-		
-		if(!divided) subdivide();
-		
-		for(auto &node : nodes)
-		{
-			node->insert(body);
-		}
-	}
-	
 }
 
 bool Quad::inBoundary(const sf::Vector3f &pos)
@@ -137,7 +136,7 @@ void Quad::draw(sf::RenderWindow &window)
 	shape[3].position = sf::Vector2f(p.x, p.y + size.y);
 	shape[4].position = { p.x, p.y };
 	
-	if(divided)
+	if(state == State::divided)
 	{
 		for(auto &node : nodes)
 		{

@@ -20,12 +20,12 @@ int main()
 	
 	window.setView(view);
 	
-	auto quadtree = Quad(sf::Vector3f(-1000.f, -1000.f, -1000.f), sf::Vector3f(3000.f, 3000.f, 3000.f));
+	auto quadtree = Quad(sf::Vector3f(-2000.f, -2000.f, -2000.f), sf::Vector3f(5000.f, 5000.f, 5000.f));
 	
 	std::vector<Body *> bodies;
-	bodies.reserve( 3000 );
+	bodies.reserve( 5000 );
 	
-	for(int i = 0; i < 3000; i++)
+	for(int i = 0; i < 5000; i++)
 	{
 		//Generate sphere coordinate
 		float u = randf();
@@ -34,7 +34,7 @@ int main()
 		float theta = u * 2.f * PI;
 		float phi = acosf(2.f * v - 1.f);
 		
-		float radius = powf(randf(), 1.f / 3.f) * 500.f; //Cube root for uniform distribution
+		float radius = powf(randf(), 1.f / 3.f) * 600.f; //Cube root for uniform distribution
 		
 		float sinTheta = sinf(theta);
 		float cosTheta = cosf(theta);
@@ -43,15 +43,17 @@ int main()
 		
 		auto bodyPosition = sf::Vector3f(radius * sinPhi * cosTheta, radius * sinPhi * sinTheta, radius * cosPhi);
 		
+
+		float speed = sqrtf(100.f / radius);
+		sf::Vector3f initialVelocity = speed * sf::Vector3f(bodyPosition.y, -bodyPosition.x, 0.f); //Normalize vector
+		
 		bodies.push_back(
 			new Body(
 				bodyPosition + sf::Vector3f(500.f, 500.f, 500.f),
+				initialVelocity,
 				rand() % 10 + 10
 			)
 		);
-		
-		float speed = sqrtf(100.f / radius);
-		bodies[i]->velocity = speed * sf::Vector3f( bodyPosition.y, -bodyPosition.x, 0.f ); //Normalize vector
 	}
 	
 	sf::Clock deltaClock;

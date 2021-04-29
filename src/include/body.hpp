@@ -17,18 +17,22 @@ class Body
 	private:
 		sf::VertexArray shape;
 		
+		static float minDepth;
+		static float maxDepth;
+		
 		static float G;
 		static float precision;
 		
 		float size;
+
+		sf::Vector3f velocity;
 		
 	public:
 		sf::Vector3f position;
-		sf::Vector3f velocity;
 		float radius;
 		float mass;
 		
-		Body(const sf::Vector3f &position, float mass);
+		Body(const sf::Vector3f &position, const sf::Vector3f &initialVelocity, float mass);
 		
 		/// Calculate the gravity from all of the bodies in the quadtree
 		void gravity(Quad *quadtree, const float &dt);
