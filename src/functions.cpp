@@ -1,4 +1,4 @@
-#include "include/functions.hpp"
+#include "functions.hpp"
 
 float clamp(float value, float min, float max)
 {

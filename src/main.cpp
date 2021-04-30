@@ -2,15 +2,16 @@
 #include <iostream>
 #include <math.h>
 #include <stdlib.h>
+#include <ctime>
 
 constexpr float PI = 3.14159265359;
 
 
 #include <SFML/Graphics.hpp>
 
-#include "include/body.hpp"
-#include "include/tree.hpp"
-#include "include/functions.hpp"
+#include "body.hpp"
+#include "tree.hpp"
+#include "functions.hpp"
 
 int main()
 {
@@ -20,12 +21,12 @@ int main()
 	
 	window.setView(view);
 	
-	auto quadtree = Quad(sf::Vector3f(-2000.f, -2000.f, -2000.f), sf::Vector3f(5000.f, 5000.f, 5000.f));
+	auto quadtree = Quad(sf::Vector3f(-2000.f, -2000.f, -2000.f), 5000.f);
 	
 	std::vector<Body *> bodies;
-	bodies.reserve( 5000 );
+	bodies.reserve( 3000 );
 	
-	for(int i = 0; i < 5000; i++)
+	for(int i = 0; i < 3000; i++)
 	{
 		//Generate sphere coordinate
 		float u = randf();
@@ -139,7 +140,7 @@ int main()
 		realDt = deltaClock.restart().asSeconds();
 		runningDt = isRunning ? realDt : 0.f;
 		
-		std::cout << "FPS: " << 1.f / realDt << std::endl;
+		// std::cout << "FPS: " << 1.f / realDt << std::endl;
 	}
 
 	return 0;

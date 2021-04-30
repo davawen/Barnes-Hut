@@ -17,7 +17,7 @@ struct Quad
 	
 	public:
 		sf::Vector3f p;
-		sf::Vector3f size;
+		float size; // Gonna assume its square
 		
 		enum State { empty, leaf, divided };
 		
@@ -30,7 +30,7 @@ struct Quad
 
 		Quad();
 		
-		Quad(const sf::Vector3f &p, const sf::Vector3f &size);
+		Quad(const sf::Vector3f &p, const float &size);
 		
 		void cleanRoot();
 		

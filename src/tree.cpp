@@ -1,13 +1,15 @@
-#include "include/tree.hpp"
+#include "tree.hpp"
 
-Quad::Quad() : Quad( sf::Vector3f(), sf::Vector3f() ) {}
+Quad::Quad() : Quad( sf::Vector3f(), 0.f ) {}
 
-Quad::Quad( const sf::Vector3f &p, const sf::Vector3f &size)
+Quad::Quad( const sf::Vector3f &p, const float &size)
 {
 	this->p = p;
 	this->size = size;
-
-	this->centerOfMass = p + size / 2.f;
+	
+	float halfSize = size * .5f;
+	
+	this->centerOfMass = { p.x + halfSize, p.y + halfSize, p.z + halfSize };
 	this->mass = 0;
 	
 	this->state = State::empty;
@@ -26,7 +28,7 @@ Quad::Quad( const sf::Vector3f &p, const sf::Vector3f &size)
 
 void Quad::subdivide()
 {
-	sf::Vector3f halfSize = size / 2.f;
+	float halfSize = size / 2.f;
 	
 	for(int i = 0; i <= 1; i++)
 	{
@@ -36,9 +38,9 @@ void Quad::subdivide()
 			{
 				nodes[i*4 + j*2 + k] = new Quad(
 					sf::Vector3f(
-						p.x + size.x * i * .5f,
-						p.y + size.y * j * .5f,
-						p.z + size.z * k * .5f
+						p.x + size * i * .5f,
+						p.y + size * j * .5f,
+						p.z + size * k * .5f
 					),
 					halfSize
 				);
@@ -66,7 +68,7 @@ void Quad::cleanRoot()
 	// Offset quadtree to stay at center of mass
 	// p -= (( p + size / 2.f ) - centerOfMass);
 	
-	centerOfMass = p + size / 2.f;
+	centerOfMass = { p.x + size * .5f, p.y + size * .5f, p.z + size * .5f };
 	mass = 0;
 	
 	if(state != State::divided) return;
@@ -116,11 +118,11 @@ void Quad::insert(Body *body)
 bool Quad::inBoundary(const sf::Vector3f &pos)
 {
 	return pos.x >= p.x          &&
-		   pos.x <= p.x + size.x &&
+		   pos.x <= p.x + size &&
 		   pos.y >= p.y          &&
-		   pos.y <= p.y + size.y &&
+		   pos.y <= p.y + size &&
 		   pos.z >= p.z          &&
-		   pos.z <= p.z + size.z;
+		   pos.z <= p.z + size;
 }
 
 void Quad::draw(sf::RenderWindow &window)
@@ -128,12 +130,10 @@ void Quad::draw(sf::RenderWindow &window)
 	auto shape = sf::VertexArray(sf::PrimitiveType::LineStrip, 5);
 	
 	shape[0].position = { p.x, p.y };
-	shape[1].position = sf::Vector2f(p.x + size.x, p.y);
+	shape[1].position = sf::Vector2f(p.x + size, p.y);
 	
-	sf::Vector3f p2 = p + size;
-	
-	shape[2].position = { p2.x, p2.y };
-	shape[3].position = sf::Vector2f(p.x, p.y + size.y);
+	shape[2].position = { p.x + size, p.y + size };
+	shape[3].position = sf::Vector2f(p.x, p.y + size);
 	shape[4].position = { p.x, p.y };
 	
 	if(state == State::divided)

@@ -5,6 +5,7 @@
 #include <vector>
 #include <math.h>
 #include <iostream>
+#include <Windows.h>
 
 #include <SFML/Graphics.hpp>
 
@@ -16,9 +17,6 @@ class Body
 {
 	private:
 		sf::VertexArray shape;
-		
-		static float minDepth;
-		static float maxDepth;
 		
 		static float G;
 		static float precision;

@@ -1,12 +1,9 @@
-#include "include/body.hpp"
+#include "body.hpp"
 
-#include "include/tree.hpp"
+#include "tree.hpp"
 
-float Body::G = 1.f;
+float Body::G = 100.f;
 float Body::precision = 3.f;
-
-float Body::minDepth = 0.f;
-float Body::maxDepth = 0.f;
 
 Body::Body(const sf::Vector3f &position, const sf::Vector3f &initialVelocity, float mass)
 {
@@ -30,8 +27,6 @@ Body::Body(const sf::Vector3f &position, const sf::Vector3f &initialVelocity, fl
 void Body::gravity(Quad *quadtree, const float &dt)
 {
 	// If this is a leaf, calculate gravity as normal
-	// std::cout << "a\n";
-	
 	
 	switch(quadtree->state)
 	{
@@ -44,37 +39,46 @@ void Body::gravity(Quad *quadtree, const float &dt)
 		{
 			auto diff = quadtree->centerOfMass - position;
 			
-			float sqDst = diff.x * diff.x + diff.y * diff.y + diff.z * diff.z;
+			float invDst = 1.f / sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 			
-			if(sqDst <= 1) return;
+			if(invDst <= 1) return;
 			
-			diff /= sqrtf(sqDst); // Normalize difference
+			diff *= invDst; // Normalize difference
 			
 			// Minimize component wise multiplication
 			// float forceValue = G * quadtree->mass / sqDst;
 			// auto force = forceValue * diff;
 			// velocity += force * dt;
 			
-			velocity += (G * quadtree->mass * dt) / sqDst * diff; 
+			velocity += G * quadtree->mass * dt * invDst * invDst * diff;
 		}
 			break;
 		case Quad::State::divided:
 		{
 			auto diff = quadtree->centerOfMass - position;
 			
-			float distance = sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+			float invDst = 1.f / sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 			
-			float theta = quadtree->size.x / distance;
+			float theta = quadtree->size * invDst;
 			
 			if(theta < precision)
 			{
 				// Calculate far field force
 				
-				diff /= distance; // Normalize difference
+				if(position.x >= 0xFFFFFF)
+				{
+					printf("diffx: %f, diffy: %f, diffz: %f\nG: %f, dt: %f, invDst: %f\n",
+						diff.x, diff.y, diff.z, G, dt, invDst
+					);
+
+					Sleep(300);
+				}
+				
+				diff *= invDst; // Normalize difference
 				
 				// Minimize component wise multiplication
 				
-				velocity += ( G * quadtree->mass * dt ) / (distance * distance) * diff;
+				velocity += G * quadtree->mass * dt * invDst * invDst * diff;
 			}
 			else
 			{
@@ -92,9 +96,6 @@ void Body::update(float dt)
 {
 	position += velocity * dt;
 	
-	if(position.z < minDepth) minDepth = position.z;
-	else if(position.z > maxDepth) maxDepth = position.z;
-	
 	// shape[0].position = { position.x, position.y };
 	
 
@@ -108,10 +109,5 @@ void Body::update(float dt)
 
 void Body::draw(sf::RenderWindow &window)
 {
-	for(int i = 0; i < 4; i++)
-	{
-		this->shape[i].color.a = static_cast<uint8_t>( 0xFF * ( position.z - minDepth ) / ( maxDepth - minDepth ) );
-	}
-	
 	window.draw(shape);
 }
