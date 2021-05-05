@@ -39,46 +39,36 @@ void Body::gravity(Quad *quadtree, const float &dt)
 		{
 			auto diff = quadtree->centerOfMass - position;
 			
-			float invDst = 1.f / sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+			double invDst = 1.f / sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 			
-			if(invDst <= 1) return;
+			if(invDst > 1) return;
 			
-			diff *= invDst; // Normalize difference
+			diff *= static_cast<float>( invDst ); // Normalize difference
 			
 			// Minimize component wise multiplication
 			// float forceValue = G * quadtree->mass / sqDst;
 			// auto force = forceValue * diff;
 			// velocity += force * dt;
 			
-			velocity += G * quadtree->mass * dt * invDst * invDst * diff;
+			velocity += static_cast<float>( G * quadtree->mass * dt * invDst * invDst ) * diff;
 		}
 			break;
 		case Quad::State::divided:
 		{
 			auto diff = quadtree->centerOfMass - position;
 			
-			float invDst = 1.f / sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+			double invDst = 1.f / sqrtf(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 			
 			float theta = quadtree->size * invDst;
 			
 			if(theta < precision)
 			{
 				// Calculate far field force
-				
-				if(position.x >= 0xFFFFFF)
-				{
-					printf("diffx: %f, diffy: %f, diffz: %f\nG: %f, dt: %f, invDst: %f\n",
-						diff.x, diff.y, diff.z, G, dt, invDst
-					);
-
-					Sleep(300);
-				}
-				
-				diff *= invDst; // Normalize difference
+				diff *= static_cast<float>(invDst); // Normalize difference
 				
 				// Minimize component wise multiplication
 				
-				velocity += G * quadtree->mass * dt * invDst * invDst * diff;
+				velocity += static_cast<float>( G * quadtree->mass * dt * invDst * invDst ) * diff;
 			}
 			else
 			{
@@ -98,13 +88,14 @@ void Body::update(float dt)
 	
 	// shape[0].position = { position.x, position.y };
 	
-
-	// float s = size / std::max(position.z * .001f, 0.1f);
-
-	shape[0].position = { position.x - size / 2.f, position.y - size / 2.f };
-	shape[1].position = { position.x + size / 2.f, position.y - size / 2.f };
-	shape[2].position = { position.x + size / 2.f, position.y + size / 2.f };
-	shape[3].position = { position.x - size / 2.f, position.y + size / 2.f };
+	
+	// float s = size / std::max( powf(1.001f, position.z), 1.f);
+	float s = size;
+	
+	shape[0].position = { position.x - s / 2.f, position.y - s / 2.f };
+	shape[1].position = { position.x + s / 2.f, position.y - s / 2.f };
+	shape[2].position = { position.x + s / 2.f, position.y + s / 2.f };
+	shape[3].position = { position.x - s / 2.f, position.y + s / 2.f };
 }
 
 void Body::draw(sf::RenderWindow &window)

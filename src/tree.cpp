@@ -66,7 +66,7 @@ void Quad::clean()
 void Quad::cleanRoot()
 {
 	// Offset quadtree to stay at center of mass
-	// p -= (( p + size / 2.f ) - centerOfMass);
+	// p -= (p + sf::Vector3f(size*.5f, size*.5f, size*.5f)) - centerOfMass;
 	
 	centerOfMass = { p.x + size * .5f, p.y + size * .5f, p.z + size * .5f };
 	mass = 0;

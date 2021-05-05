@@ -13,20 +13,52 @@ constexpr float PI = 3.14159265359;
 #include "tree.hpp"
 #include "functions.hpp"
 
-int main()
-{
+int main(int argc, char *argv[])
+{	
+	int BODY_COUNT = 5000;
+	float INITIAL_VELOCITY = 100.f;
+	
+	std::cout << "Enter body count (" << BODY_COUNT << ")\n-> ";
+	if(std::cin.peek() != '\n')
+		std::cin >> BODY_COUNT;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	
+	std::cout << "Initial velocity (" << INITIAL_VELOCITY << ")\n-> ";
+	if(std::cin.peek() != '\n')
+		std::cin >> INITIAL_VELOCITY;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	
+	std::cout << "\nApplication Started!";
+		
+	#pragma region UI Related Buisness
+	
 	sf::RenderWindow window(sf::VideoMode(1000, 1000), "Barnes Hut Simulation");
 	
-	sf::View view = sf::View(sf::Vector2f(500, 500), sf::Vector2f(2000, 2000));
-	
+	const sf::Vector2f originalViewSize = sf::Vector2f(2000.f, 2000.f);
+	sf::View view = sf::View(sf::Vector2f(500, 500), originalViewSize);
 	window.setView(view);
 	
-	auto quadtree = Quad(sf::Vector3f(-2000.f, -2000.f, -2000.f), 5000.f);
+	sf::Font font;
+	if(!font.loadFromFile(std::string(argv[0]) + "/../Montserrat-Regular.ttf"))
+	{
+		return -1; //Failed to load font
+	}
+	
+	sf::Text text;
+	text.setFont(font);
+	text.setFillColor(sf::Color::Green);
+	text.setString("");
+	
+	#pragma endregion
+	
+	#pragma region Setup simulation
+	
+	auto quadtree = Quad(sf::Vector3f(-20000.f, -20000.f, -20000.f), 40000.f);
 	
 	std::vector<Body *> bodies;
-	bodies.reserve( 3000 );
+	bodies.reserve( BODY_COUNT );
 	
-	for(int i = 0; i < 3000; i++)
+	for(int i = 0; i < BODY_COUNT; i++)
 	{
 		//Generate sphere coordinate
 		float u = randf();
@@ -35,7 +67,7 @@ int main()
 		float theta = u * 2.f * PI;
 		float phi = acosf(2.f * v - 1.f);
 		
-		float radius = powf(randf(), 1.f / 3.f) * 600.f; //Cube root for uniform distribution
+		float radius = powf(randf(), 1.f / 3.f) * 1000.f; //Cube root for uniform distribution
 		
 		float sinTheta = sinf(theta);
 		float cosTheta = cosf(theta);
@@ -45,25 +77,31 @@ int main()
 		auto bodyPosition = sf::Vector3f(radius * sinPhi * cosTheta, radius * sinPhi * sinTheta, radius * cosPhi);
 		
 
-		float speed = sqrtf(100.f / radius);
+		float speed = sqrtf( INITIAL_VELOCITY / radius);
 		sf::Vector3f initialVelocity = speed * sf::Vector3f(bodyPosition.y, -bodyPosition.x, 0.f); //Normalize vector
 		
 		bodies.push_back(
 			new Body(
 				bodyPosition + sf::Vector3f(500.f, 500.f, 500.f),
 				initialVelocity,
-				rand() % 10 + 10
+				rand() % 100 + 50
 			)
 		);
 	}
 	
+	#pragma endregion
+	
+	#pragma region Misc
+	
 	sf::Clock deltaClock;
+
+	float realDt = 0.f;
+	float runningDt = 0.f;
 	
 	bool isRunning = false;
 	bool isDrawingQuadtree = false;
 	
-	float realDt = 0.f;
-	float runningDt = 0.f;
+	#pragma endregion
 	
 	while(window.isOpen())
 	{
@@ -135,12 +173,22 @@ int main()
 			quadtree.insert( body );
 		}
 		
-		window.display();
+		#pragma region Get deltatime
 		
 		realDt = deltaClock.restart().asSeconds();
 		runningDt = isRunning ? realDt : 0.f;
 		
-		// std::cout << "FPS: " << 1.f / realDt << std::endl;
+
+		text.setPosition(window.mapPixelToCoords(sf::Vector2i(5, 5)));
+		text.setScale(view.getSize().x / originalViewSize.x, view.getSize().y / originalViewSize.y);
+		
+		text.setString("FPS: " + std::to_string(1.f / realDt));
+		
+		#pragma endregion
+		
+		window.draw(text);
+		
+		window.display();
 	}
 
 	return 0;

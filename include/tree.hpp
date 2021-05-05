@@ -3,6 +3,7 @@
 #define __TREE_H__
 
 #include <vector>
+#include <iostream>
 #include <list>
 
 #include <SFML/Graphics.hpp>

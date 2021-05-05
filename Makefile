@@ -1,8 +1,8 @@
 CC=g++
 
-CFLAGS=-c -Wall -Wno-unknown-pragmas
+CFLAGS=-c -Wall -Ofast -Wno-unknown-pragmas
 
-SOURCE_FILES = main.cpp
+SOURCE_FILES = main.cpp body.cpp functions.cpp tree.cpp
 
 INCLUDE_DIRECTORIES = ./include/ C:/Libraries/SFML-2.5.1/include/
 LIB_DIRECTORIES = C:/Libraries/SFML-2.5.1/lib/

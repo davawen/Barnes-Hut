@@ -17,15 +17,14 @@ class Body
 {
 	private:
 		sf::VertexArray shape;
-		
-		static float G;
-		static float precision;
-		
 		float size;
 
 		sf::Vector3f velocity;
 		
 	public:
+		static float G;
+		static float precision;
+
 		sf::Vector3f position;
 		float radius;
 		float mass;
