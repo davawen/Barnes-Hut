@@ -16,6 +16,8 @@ OBJECT_FILES = $(SOURCE_FILES:src/%.cpp=obj/%.o)
 OBJECT_DIR = $(sort $(dir $(OBJECT_FILES)))
 OBJECT_DIR := $(OBJECT_DIR:/=)
 
+OBJECT_DIR += bin # Add these folders when pulling from github, for example
+
 INCLUDE_DIRECTORIES := $(addprefix -I,$(INCLUDE_DIRECTORIES))
 LIB_DIRECTORIES := $(addprefix -L,$(LIB_DIRECTORIES))
 
