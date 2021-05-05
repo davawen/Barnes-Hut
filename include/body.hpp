@@ -16,8 +16,7 @@ class Quad;
 class Body
 {
 	private:
-		sf::VertexArray shape;
-		float size;
+		sf::Vertex shape;
 
 		sf::Vector3f velocity;
 		
@@ -30,6 +29,7 @@ class Body
 		float mass;
 		
 		Body(const sf::Vector3f &position, const sf::Vector3f &initialVelocity, float mass);
+		Body(const sf::Vector3f &position, const sf::Vector3f &initialVelocity, float mass, uint32_t color);
 		
 		/// Calculate the gravity from all of the bodies in the quadtree
 		void gravity(Quad *quadtree, const float &dt);

@@ -15,8 +15,10 @@ constexpr float PI = 3.14159265359;
 
 int main(int argc, char *argv[])
 {	
-	int BODY_COUNT = 5000;
+	int BODY_COUNT = 15000;
 	float INITIAL_VELOCITY = 100.f;
+	
+	#pragma region Take Input
 	
 	std::cout << "Enter body count (" << BODY_COUNT << ")\n-> ";
 	if(std::cin.peek() != '\n')
@@ -28,9 +30,16 @@ int main(int argc, char *argv[])
 		std::cin >> INITIAL_VELOCITY;
 	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 	
-	std::cout << "\nApplication Started!";
+	std::cout << "G Value (" << Body::G << ")\n-> ";
+	if(std::cin.peek() != '\n')
+		std::cin >> Body::G;
+	std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+	
+	std::cout << "Application Started!";
 		
-	#pragma region UI Related Buisness
+	#pragma endregion
+		
+	#pragma region Create UI
 	
 	sf::RenderWindow window(sf::VideoMode(1000, 1000), "Barnes Hut Simulation");
 	
@@ -53,7 +62,10 @@ int main(int argc, char *argv[])
 	
 	#pragma region Setup simulation
 	
-	auto quadtree = Quad(sf::Vector3f(-20000.f, -20000.f, -20000.f), 40000.f);
+	// The size of the quadtree shouldn't affect perfomance too much, as long as the numbers don't get too big
+	auto quadtree = Quad(sf::Vector3f(-30000.f, -30000.f, -30000.f), 60000.f);
+	
+	int radiusMultiplier = powf(std::max(BODY_COUNT, 1000), 1.f / 3.f) * 50.f;
 	
 	std::vector<Body *> bodies;
 	bodies.reserve( BODY_COUNT );
@@ -67,7 +79,8 @@ int main(int argc, char *argv[])
 		float theta = u * 2.f * PI;
 		float phi = acosf(2.f * v - 1.f);
 		
-		float radius = powf(randf(), 1.f / 3.f) * 1000.f; //Cube root for uniform distribution
+		float linearRadius = randf();
+		float radius = powf(linearRadius, 1.f / 3.f) * radiusMultiplier; //Cube root for uniform distribution
 		
 		float sinTheta = sinf(theta);
 		float cosTheta = cosf(theta);
@@ -76,15 +89,17 @@ int main(int argc, char *argv[])
 		
 		auto bodyPosition = sf::Vector3f(radius * sinPhi * cosTheta, radius * sinPhi * sinTheta, radius * cosPhi);
 		
-
-		float speed = sqrtf( INITIAL_VELOCITY / radius);
+		float speed = sqrtf( INITIAL_VELOCITY / radius ) ;
 		sf::Vector3f initialVelocity = speed * sf::Vector3f(bodyPosition.y, -bodyPosition.x, 0.f); //Normalize vector
+		
+		uint32_t color = (static_cast<int>(linearRadius * 0x7F) << 16) + (static_cast<int>(linearRadius * 0xFF) << 8) + 0xFF0000FF;
 		
 		bodies.push_back(
 			new Body(
 				bodyPosition + sf::Vector3f(500.f, 500.f, 500.f),
 				initialVelocity,
-				rand() % 100 + 50
+				100,
+				color
 			)
 		);
 	}
@@ -145,6 +160,11 @@ int main(int argc, char *argv[])
 						case sf::Keyboard::Q:
 							isDrawingQuadtree = !isDrawingQuadtree;
 							break;
+						case sf::Keyboard::F11:
+							window.create( sf::VideoMode::getFullscreenModes()[0], "Barnes Hut Simulation", sf::Style::Fullscreen );
+							
+							view.setSize(sf::Vector2f(window.getSize()));
+							break;
 						default:
 							break;
 					}
@@ -180,7 +200,7 @@ int main(int argc, char *argv[])
 		
 
 		text.setPosition(window.mapPixelToCoords(sf::Vector2i(5, 5)));
-		text.setScale(view.getSize().x / originalViewSize.x, view.getSize().y / originalViewSize.y);
+		text.setScale(view.getSize().y / originalViewSize.y, view.getSize().y / originalViewSize.y);
 		
 		text.setString("FPS: " + std::to_string(1.f / realDt));
 		

@@ -129,12 +129,12 @@ void Quad::draw(sf::RenderWindow &window)
 {
 	auto shape = sf::VertexArray(sf::PrimitiveType::LineStrip, 5);
 	
-	shape[0].position = { p.x, p.y };
-	shape[1].position = sf::Vector2f(p.x + size, p.y);
+	shape[0].position = sf::Vector2f(p.x,        p.y       );
+	shape[1].position = sf::Vector2f(p.x + size, p.y       );
+	shape[2].position = sf::Vector2f(p.x + size, p.y + size);
+	shape[3].position = sf::Vector2f(p.x,        p.y + size);
 	
-	shape[2].position = { p.x + size, p.y + size };
-	shape[3].position = sf::Vector2f(p.x, p.y + size);
-	shape[4].position = { p.x, p.y };
+	shape[4].position = shape[0].position;
 	
 	if(state == State::divided)
 	{
