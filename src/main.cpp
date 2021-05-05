@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
 		
 	#pragma region Create UI
 	
+	bool inFullscreen = false;
+	
 	sf::RenderWindow window(sf::VideoMode(1000, 1000), "Barnes Hut Simulation");
 	
 	const sf::Vector2f originalViewSize = sf::Vector2f(2000.f, 2000.f);
@@ -161,9 +163,19 @@ int main(int argc, char *argv[])
 							isDrawingQuadtree = !isDrawingQuadtree;
 							break;
 						case sf::Keyboard::F11:
-							window.create( sf::VideoMode::getFullscreenModes()[0], "Barnes Hut Simulation", sf::Style::Fullscreen );
+						{
+							if(inFullscreen)
+							{
+								window.create(sf::VideoMode(1000, 1000), "Barnes Hut Simulation");
+							}
+							else //Else, go in fullscreen mode
+							{
+								window.create( sf::VideoMode::getFullscreenModes()[0], "Barnes Hut Simulation", sf::Style::Fullscreen );
+							}
+							inFullscreen = !inFullscreen;
 							
 							view.setSize(sf::Vector2f(window.getSize()));
+						}
 							break;
 						default:
 							break;
